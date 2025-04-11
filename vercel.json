@@ -1,12 +1,6 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/nextjs@canary",
-      "config": {
-        "installCommand": "pnpm install --no-frozen-lockfile"
-      }
-    }
-  ]
+  "buildCommand": "pnpm run build",
+  "installCommand": "pnpm install --no-frozen-lockfile",
+  "framework": "nextjs"
 }
