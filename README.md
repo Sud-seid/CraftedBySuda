@@ -2,7 +2,6 @@
 
 - ⚡️ Next.js 14 with App Router
 - 🎨 shadcn/ui components with customizable themes
-- 🌓 Dark/light mode toggle
 - ✨ Interactive particle background animation
 - 📱 Fully responsive design
 - 🛠 TypeScript support
