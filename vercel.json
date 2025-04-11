@@ -3,11 +3,12 @@
   "builds": [
     {
       "src": "package.json",
-      "use": "@vercel/nextjs",
-      "config": {
-        "installCommand": "pnpm install --no-frozen-lockfile",
-        "buildCommand": "pnpm run build"
-      }
+      "use": "@vercel/nextjs"
     }
-  ]
+  ],
+  "build": {
+    "env": {
+      "NPM_CONFIG_IGNORE_SCRIPTS": "true"
+    }
+  }
 }
