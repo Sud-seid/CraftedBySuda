@@ -1,11 +1,5 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/nextjs"
-    }
-  ],
   "build": {
     "env": {
       "NPM_CONFIG_IGNORE_SCRIPTS": "true"
