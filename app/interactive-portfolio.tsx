@@ -1,102 +1,125 @@
-"use client"
-
+"use client";
 import { FaTelegramPlane } from "react-icons/fa";
 import { FaGithub, FaLinkedin, FaEnvelope } from "react-icons/fa";
 import { SiFigma, SiAdobeillustrator, SiAdobephotoshop, SiSketch, SiBlender } from 'react-icons/si';
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react";
 import Image from 'next/image';
 import {
- 
   Palette,
   Layers,
   PenTool,
   ImageIcon,
   Monitor,
   Figma,
-  Instagram,
-  Twitter,
-  Dribbble,
-  Linkedin,
-  GitlabIcon as GitHub,
   Mail,
   Menu,
   X,
   ArrowRight,
   Download
 } from "lucide-react";
-import { motion } from "framer-motion"
+import { motion } from "framer-motion";
 
 export default function InteractivePortfolio() {
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+  const particlesRef = useRef<HTMLDivElement>(null);
+  const projects = {
+    posters: [
+      { src: "/pst1.png", alt: "Poster 1", width: 600, height: 400 },
+      { src: "/pst2.png", alt: "Poster 2", width: 600, height: 400 }
+    ],
+    logos: [
+      { src: "/logo1.png", alt: "Logo 1", width: 300, height: 300 },
+      { src: "/logo2.png", alt: "Logo 2", width: 300, height: 300 }
+    ],
+    branding: [
+      { src: "/branding1.png", alt: "Branding 1", width: 600, height: 400 },
+      { src: "/branding2.png", alt: "Branding 2", width: 600, height: 400 }
+    ],
+    ui: [
+      { src: "/ui1.png", alt: "UI Design 1", width: 600, height: 400 },
+      { src: "/ui2.png", alt: "UI Design 2", width: 600, height: 400 }
+    ]
+  };
+  useEffect(() => {
+    setIsClient(true); // Mark that we're on client side
+    
+    if (particlesRef.current) {
+      const particles = particlesRef.current.querySelectorAll(".particle");
+
+      particles.forEach((particle) => {
+        const particleElement = particle as HTMLElement;
+        const speed = 0.3 + Math.random() * 0.4;
+        const angle = Math.random() * Math.PI * 2;
+        const xVelocity = Math.cos(angle) * speed;
+        const yVelocity = Math.sin(angle) * speed;
+
+        let x = Number.parseFloat(particleElement.getAttribute("data-x") || "0");
+        let y = Number.parseFloat(particleElement.getAttribute("data-y") || "0");
+
+        const moveParticle = () => {
+          x += xVelocity;
+          y += yVelocity;
+
+          if (typeof window !== 'undefined') {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+
+            if (x < -10) x = width + 10;
+            if (x > width + 10) x = -10;
+            if (y < -10) y = height + 10;
+            if (y > height + 10) y = -10;
+          }
+
+          particleElement.setAttribute("data-x", x.toString());
+          particleElement.setAttribute("data-y", y.toString());
+          particleElement.style.transform = `translate(${x}px, ${y}px)`;
+          requestAnimationFrame(moveParticle);
+        };
+        moveParticle();
+      });
+    }
+  }, []);
 
   const handleDownload = () => {
     setIsDownloading(true);
     try {
-      const link = document.createElement('a');
-      link.href = '/resume.pdf';
-      link.download = 'Suda-Creative-Resume.pdf';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+        const link = document.createElement('a');
+        link.href = '/resume.pdf';
+        link.download = 'Suda-Creative-Resume.pdf';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
     } catch (error) {
       console.error('Download failed:', error);
-      window.open('/resume.pdf', '_blank');
+      if (typeof window !== 'undefined') {
+        window.open('/resume.pdf', '_blank');
+      }
     } finally {
       setTimeout(() => setIsDownloading(false), 2000);
     }
-  }; 
-  
-  const particlesRef = useRef<HTMLDivElement>(null);
+  };
 
-  useEffect(() => {
-   
-    if (particlesRef.current) {
-      const particles = particlesRef.current.querySelectorAll(".particle")
-
-      particles.forEach((particle) => {
-        const particleElement = particle as HTMLElement
-
-      
-        const speed = 0.3 + Math.random() * 0.4
-        const angle = Math.random() * Math.PI * 2
-        const xVelocity = Math.cos(angle) * speed
-        const yVelocity = Math.sin(angle) * speed
-
-        let x = Number.parseFloat(particleElement.getAttribute("data-x") || "0")
-        let y = Number.parseFloat(particleElement.getAttribute("data-y") || "0")
-
-        const moveParticle = () => {
-          
-          x += xVelocity
-          y += yVelocity
-
-         
-          const width = window.innerWidth
-          const height = window.innerHeight
-
-          if (x < -10) x = width + 10
-          if (x > width + 10) x = -10
-          if (y < -10) y = height + 10
-          if (y > height + 10) y = -10
-
-          
-          particleElement.setAttribute("data-x", x.toString())
-          particleElement.setAttribute("data-y", y.toString())
-          particleElement.style.transform = `translate(${x}px, ${y}px)`
-          requestAnimationFrame(moveParticle)
-        }
-        moveParticle()
-      })
+  // Generate initial particle positions only on client side
+  const getInitialParticlePositions = () => {
+    if (typeof window === 'undefined') {
+      return Array.from({ length: 100 }).map(() => ({ x: 0, y: 0 }));
     }
-  }, [])
+    return Array.from({ length: 100 }).map(() => ({
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight
+    }));
+  };
+
   return (
     <div className="min-h-screen bg-black text-white">
       <div ref={particlesRef} className="fixed inset-0 pointer-events-none overflow-hidden">
-        {Array.from({ length: 100 }).map((_, i) => {
-          const x = Math.random() * window.innerWidth
-          const y = Math.random() * window.innerHeight
+        {isClient && Array.from({ length: 100 }).map((_, i) => {
+          const positions = getInitialParticlePositions();
           return (
             <div
               key={i}
@@ -104,16 +127,16 @@ export default function InteractivePortfolio() {
               style={{
                 left: 0,
                 top: 0,
-                transform: `translate(${x}px, ${y}px)`,
+                transform: `translate(${positions[i]?.x || 0}px, ${positions[i]?.y || 0}px)`,
                 opacity: Math.random() * 0.5 + 0.2,
               }}
-              data-x={x}
-              data-y={y}
+              data-x={positions[i]?.x || 0}
+              data-y={positions[i]?.y || 0}
             />
-          )
+          );
         })}
       </div>
-
+      
       {/* Nav */}
       <header className="fixed top-0 left-0 right-0 z-50">
         <div className="container mx-auto px-6 py-4 flex justify-between items-center">
@@ -319,175 +342,182 @@ export default function InteractivePortfolio() {
 
 
       {/* About Section */}
-<section id="about" className="py-20 relative">
-  <div className="container mx-auto px-6">
-    <h2 className="text-3xl font-bold text-white mb-12 text-center">About Me</h2>
+    <section id="about" className="py-20 relative">
+      <div className="container mx-auto px-6">
+        <h2 className="text-3xl font-bold text-white mb-12 text-center">About Me</h2>
 
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-      <div className="relative w-full h-[350px] rounded-2xl overflow-hidden">
-        <Image
-          src="/about.png"
-          alt="Picture of Suda"
-          layout="fill"
-          objectFit="cover"
-          className="rounded-2xl"
-        />
-      </div>
-      <div>
-        <h3 className="text-2xl font-bold text-white mb-4">I'm SUDA, a Passionate Graphic Designer</h3>
-        <p className="text-white/70 mb-4">
-          I'm a creative mind currently based in Ethiopia, with a heart full of ideas and a tablet full of sketches.
-          I blend modern aesthetics with thoughtful design to bring brands to life — whether it’s a bold logo, sleek UI, or expressive illustration.
-        </p>
-        <p className="text-white/70 mb-6">
-          My journey started with a simple pencil and a dream, and now I help others shape their identity visually. Whether you're a startup or a personal brand, I'm here to make you look *unforgettable*.
-        </p>
-
-        <div className="grid grid-cols-2 gap-4 mt-8">
-          <div>
-            <h4 className="text-[#a855f7] font-bold mb-2">Skills</h4>
-            <ul className="text-white/70 space-y-2">
-              <li>Branding & Identity</li>
-              <li>UI/UX Design</li>
-              <li>Digital Illustration</li>
-              <li>Layout & Typography</li>
-            </ul>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+          <div className="relative w-full h-[350px] rounded-2xl overflow-hidden">
+            <Image
+              src="/about.png"
+              alt="Picture of Suda"
+              width={800}
+              height={500}
+              className="rounded-2xl object-cover"
+              priority
+            />
           </div>
           <div>
-            <h4 className="text-[#a855f7] font-bold mb-2">Tools I Use</h4>
-            <ul className="text-white/70 space-y-2">
-              <li>Figma & Adobe XD</li>
-              <li>Photoshop & Illustrator</li>
-              <li>Procreate (for digital art)</li>
-              <li>Canva (for quick turnarounds)</li>
-            </ul>
+            <h3 className="text-2xl font-bold text-white mb-4">I'm SUDA, a Passionate Graphic Designer</h3>
+            <p className="text-white/70 mb-4">
+              I'm a creative mind currently based in Ethiopia, with a heart full of ideas and a tablet full of sketches.
+              I blend modern aesthetics with thoughtful design to bring brands to life — whether it's a bold logo, sleek UI, or expressive illustration.
+            </p>
+            <p className="text-white/70 mb-6">
+              My journey started with a simple pencil and a dream, and now I help others shape their identity visually. Whether you're a startup or a personal brand, I'm here to make you look *unforgettable*.
+            </p>
+
+            <div className="grid grid-cols-2 gap-4 mt-8">
+              <div>
+                <h4 className="text-[#a855f7] font-bold mb-2">Skills</h4>
+                <ul className="text-white/70 space-y-2">
+                  <li>Branding & Identity</li>
+                  <li>UI/UX Design</li>
+                  <li>Digital Illustration</li>
+                  <li>Layout & Typography</li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="text-[#a855f7] font-bold mb-2">Tools I Use</h4>
+                <ul className="text-white/70 space-y-2">
+                  <li>Figma & Adobe XD</li>
+                  <li>Photoshop & Illustrator</li>
+                  <li>Procreate (for digital art)</li>
+                  <li>Canva (for quick turnarounds)</li>
+                </ul>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  </div>
-</section>
+    </section>
 
 
       {/* Projects Section */}
       <section id="projects" className="py-20 relative">
-  <div className="container mx-auto px-6">
-    <h2 className="text-3xl font-bold text-white mb-4 text-center">Recent Work</h2>
-    <p className="text-white/70 text-center mb-16 max-w-2xl mx-auto">
-      A brief showcase of the amazing projects I've built recently.
-    </p>
+      <div className="container mx-auto px-6">
+        <h2 className="text-3xl font-bold text-white mb-4 text-center">Recent Work</h2>
+        <p className="text-white/70 text-center mb-16 max-w-2xl mx-auto">
+          A brief showcase of the amazing projects I've built recently.
+        </p>
 
-    <div className="space-y-24">
-
-      {/* Posters */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-        <div>
-          <h3 className="text-2xl font-bold text-white mb-4">Creative Posters</h3>
-          <p className="text-white/70 mb-4">
-            Eye-catching posters designed to visually communicate ideas, events, and brands in vibrant layouts.
-          </p>
-          <p className="text-white/70 mb-6">Used for both digital campaigns and print advertising.</p>
-          <button className="px-6 py-2 bg-[#a855f7] text-white rounded-md text-sm font-medium">
-            View Designs
-          </button>
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          {["/pst1.png", "/pst2.png"].map((src, i) => (
-            <div key={i} className="overflow-hidden rounded-xl group aspect-video">
-              <img
-                src={src}
-                alt={`Poster ${i + 1}`}
-                className="w-full h-full object-cover scale-125 group-hover:scale-100 transition-transform duration-300 ease-in-out"
-              />
+        <div className="space-y-24">
+          {/* Posters */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+            <div>
+              <h3 className="text-2xl font-bold text-white mb-4">Creative Posters</h3>
+              <p className="text-white/70 mb-4">
+                Eye-catching posters designed to visually communicate ideas, events, and brands in vibrant layouts.
+              </p>
+              <p className="text-white/70 mb-6">Used for both digital campaigns and print advertising.</p>
+              <button className="px-6 py-2 bg-[#a855f7] text-white rounded-md text-sm font-medium">
+                View Designs
+              </button>
             </div>
-          ))}
+            <div className="grid grid-cols-2 gap-4">
+              {projects.posters.map((image, i) => (
+                <div key={i} className="overflow-hidden rounded-xl group aspect-video relative">
+                  <Image
+                    src={image.src}
+                    alt={image.alt}
+                    width={image.width}
+                    height={image.height}
+                    className="object-cover scale-125 group-hover:scale-100 transition-transform duration-300 ease-in-out"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Logos */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+            <div className="order-2 md:order-1 grid grid-cols-2 gap-4">
+              {projects.logos.map((image, i) => (
+                <div key={i} className="overflow-hidden rounded-xl group aspect-video bg-white p-4 relative">
+                  <Image
+                    src={image.src}
+                    alt={image.alt}
+                    width={image.width}
+                    height={image.height}
+                    className="object-contain scale-110 group-hover:scale-100 transition-transform duration-300 ease-in-out"
+                  />
+                </div>
+              ))}
+            </div>
+            <div className="order-1 md:order-2">
+              <h3 className="text-2xl font-bold text-white mb-4">Logo Designs</h3>
+              <p className="text-white/70 mb-4">
+                Minimal, memorable, and meaningful logos for startups, brands, and personal projects.
+              </p>
+              <p className="text-white/70 mb-6">
+                Built with design consistency and visual identity in mind.
+              </p>
+              <button className="px-6 py-2 bg-[#a855f7] text-white rounded-md text-sm font-medium">
+                View Logos
+              </button>
+            </div>
+          </div>
+
+          {/* Branding */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+            <div>
+              <h3 className="text-2xl font-bold text-white mb-4">Brand Identity</h3>
+              <p className="text-white/70 mb-4">
+                Complete branding systems including typography, color palettes, packaging, and tone.
+              </p>
+              <p className="text-white/70 mb-6">
+                Created to help brands stand out with clarity and character.
+              </p>
+              <button className="px-6 py-2 bg-[#a855f7] text-white rounded-md text-sm font-medium">
+                View Branding
+              </button>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              {projects.branding.map((image, i) => (
+                <div key={i} className="overflow-hidden rounded-xl group aspect-video relative">
+                  <Image
+                    src={image.src}
+                    alt={image.alt}
+                    width={image.width}
+                    height={image.height}
+                    className="object-cover scale-125 group-hover:scale-100 transition-transform duration-300 ease-in-out"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* UI/UX */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+            <div className="order-2 md:order-1 grid grid-cols-2 gap-4">
+              {projects.ui.map((image, i) => (
+                <div key={i} className="overflow-hidden rounded-xl group aspect-video relative">
+                  <Image
+                    src={image.src}
+                    alt={image.alt}
+                    width={image.width}
+                    height={image.height}
+                    className="object-cover scale-125 group-hover:scale-100 transition-transform duration-300 ease-in-out"
+                  />
+                </div>
+              ))}
+            </div>
+            <div className="order-1 md:order-2">
+              <h3 className="text-2xl font-bold text-white mb-4">UI/UX Projects</h3>
+              <p className="text-white/70 mb-4">
+                Beautiful and intuitive interfaces with strong user experience principles.
+              </p>
+              <p className="text-white/70 mb-6">
+                Designed with responsiveness, usability, and accessibility in mind.
+              </p>
+              <button className="px-6 py-2 bg-[#a855f7] text-white rounded-md text-sm font-medium">
+                View UI/UX
+              </button>
+            </div>
+          </div>
         </div>
       </div>
-
-      {/* Logos */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-        <div className="order-2 md:order-1 grid grid-cols-2 gap-4">
-          {["/logo1.png", "/logo2.png"].map((src, i) => (
-            <div key={i} className="overflow-hidden rounded-xl group aspect-video bg-white p-4">
-              <img
-                src={src}
-                alt={`Logo ${i + 1}`}
-                className="w-full h-full object-contain scale-110 group-hover:scale-100 transition-transform duration-300 ease-in-out"
-              />
-            </div>
-          ))}
-        </div>
-        <div className="order-1 md:order-2">
-          <h3 className="text-2xl font-bold text-white mb-4">Logo Designs</h3>
-          <p className="text-white/70 mb-4">
-            Minimal, memorable, and meaningful logos for startups, brands, and personal projects.
-          </p>
-          <p className="text-white/70 mb-6">
-            Built with design consistency and visual identity in mind.
-          </p>
-          <button className="px-6 py-2 bg-[#a855f7] text-white rounded-md text-sm font-medium">
-            View Logos
-          </button>
-        </div>
-      </div>
-
-      {/* Branding */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-        <div>
-          <h3 className="text-2xl font-bold text-white mb-4">Brand Identity</h3>
-          <p className="text-white/70 mb-4">
-            Complete branding systems including typography, color palettes, packaging, and tone.
-          </p>
-          <p className="text-white/70 mb-6">
-            Created to help brands stand out with clarity and character.
-          </p>
-          <button className="px-6 py-2 bg-[#a855f7] text-white rounded-md text-sm font-medium">
-            View Branding
-          </button>
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          {["/branding1.png", "/branding2.png"].map((src, i) => (
-            <div key={i} className="overflow-hidden rounded-xl group aspect-video">
-              <img
-                src={src}
-                alt={`Branding ${i + 1}`}
-                className="w-full h-full object-cover scale-125 group-hover:scale-100 transition-transform duration-300 ease-in-out"
-              />
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* UI/UX */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-        <div className="order-2 md:order-1 grid grid-cols-2 gap-4">
-          {["/ui1.png", "/ui2.png"].map((src, i) => (
-            <div key={i} className="overflow-hidden rounded-xl group aspect-video">
-              <img
-                src={src}
-                alt={`UI Design ${i + 1}`}
-                className="w-full h-full object-cover scale-125 group-hover:scale-100 transition-transform duration-300 ease-in-out"
-              />
-            </div>
-          ))}
-        </div>
-        <div className="order-1 md:order-2">
-          <h3 className="text-2xl font-bold text-white mb-4">UI/UX Projects</h3>
-          <p className="text-white/70 mb-4">
-            Beautiful and intuitive interfaces with strong user experience principles.
-          </p>
-          <p className="text-white/70 mb-6">
-            Designed with responsiveness, usability, and accessibility in mind.
-          </p>
-          <button className="px-6 py-2 bg-[#a855f7] text-white rounded-md text-sm font-medium">
-            View UI/UX
-          </button>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</section>
+    </section>
 
 
       {/* Services Section */}
