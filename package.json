@@ -3,12 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-  "dev": "next dev",
+  "dev": "next dev --turbopack",
   "build": "next build",
   "start": "next start",
   "lint": "next lint",
-  "clean": "rimraf .next node_modules pnpm-lock.yaml",
-  "prepare": "pnpm install --no-frozen-lockfile"
+  "clean": "rimraf .next node_modules/.cache"
 },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.0",
