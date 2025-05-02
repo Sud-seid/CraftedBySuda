@@ -117,25 +117,36 @@ export default function InteractivePortfolio() {
 
   return (
     <div className="min-h-screen bg-black text-white">
-      <div ref={particlesRef} className="fixed inset-0 pointer-events-none overflow-hidden">
-        {isClient && Array.from({ length: 100 }).map((_, i) => {
-          const positions = getInitialParticlePositions();
-          return (
-            <div
-              key={i}
-              className="particle absolute w-1 h-1 bg-white rounded-full opacity-70"
-              style={{
-                left: 0,
-                top: 0,
-                transform: `translate(${positions[i]?.x || 0}px, ${positions[i]?.y || 0}px)`,
-                opacity: Math.random() * 0.5 + 0.2,
-              }}
-              data-x={positions[i]?.x || 0}
-              data-y={positions[i]?.y || 0}
-            />
-          );
-        })}
-      </div>
+     <div ref={particlesRef} className="fixed inset-0 pointer-events-none overflow-hidden">
+  {isClient && Array.from({ length: 100 }).map((_, i) => {
+    const positions = getInitialParticlePositions();
+    return (
+      <motion.div
+        key={i}
+        className="particle absolute w-1 h-1 bg-white rounded-full opacity-70"
+        style={{
+          left: 0,
+          top: 0,
+          opacity: Math.random() * 0.5 + 0.2,
+        }}
+        initial={{ 
+          x: positions[i]?.x || 0, 
+          y: positions[i]?.y || 0 
+        }}
+        animate={{
+          x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1000),
+          y: Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 1000),
+        }}
+        transition={{
+          duration: Math.random() * 10 + 10, // 10-20 seconds
+          repeat: Infinity,
+          repeatType: "reverse",
+          ease: "linear",
+        }}
+      />
+    );
+  })}
+</div>
       
       {/* Nav */}
       <header className="fixed top-0 left-0 right-0 z-50">
